@@ -1,13 +1,13 @@
+package kazekagyee.domain.controller
+
 import org.springframework.stereotype.Controller
-import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
+import reactor.core.publisher.Mono
+
 
 @Controller
 class ChatController {
 
     @GetMapping("/chat")
-    fun chatPage(model: Model): String {
-        model.addAttribute("title", "Hypertext Chat")
-        return "chat"
-    }
+    fun chatPage(): Mono<String> = Mono.just("chat")
 }

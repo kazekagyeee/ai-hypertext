@@ -3,6 +3,7 @@ package kazekagyee.ollama
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
+import reactor.core.publisher.Mono
 
 data class OllamaRequest(
     val model: String,
@@ -29,7 +30,7 @@ class OllamaService(
 ) {
     private val client = WebClient.create(ollamaHost)
 
-    fun ask(prompt: String): String {
+    fun ask(prompt: String): Mono<String?> {
         val request = OllamaRequest(
             model = model,
             prompt = prompt,
@@ -42,6 +43,6 @@ class OllamaService(
             .retrieve()
             .bodyToMono(OllamaResponse::class.java)
             .mapNotNull { it.response }
-            .block() ?: "Не удалось получить ответ"
+            .defaultIfEmpty("Не удалось получить ответ")
     }
 }

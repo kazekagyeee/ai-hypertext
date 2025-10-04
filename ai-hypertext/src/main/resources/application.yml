@@ -2,8 +2,6 @@ server:
   port: 8080
   http2:
     enabled: true
-  servlet:
-    context-path: /api
 
 spring:
   application:
@@ -17,10 +15,11 @@ spring:
       max-file-size: ${MAX_FILE_SIZE:-1}
       max-request-size: ${MAX_REQUEST_SIZE:-1}
       enabled: true
-  codec:
-    max-in-memory-size: 64MB
   jackson:
     default-property-inclusion: non_null
+  http:
+    codecs:
+      max-in-memory-size: 64MB
 
 app:
   ollama:
