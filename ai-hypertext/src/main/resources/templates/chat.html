@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <title>Hypertext Chat</title>
+    <style>
+        body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        h2 {
+            margin-bottom: 1rem;
+            color: #58a6ff;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        #chat-box {
+            width: 100%;
+            max-width: 800px;
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 1rem;
+            overflow-y: auto;
+            flex: 1;
+            margin-bottom: 1rem;
+            box-shadow: 0 0 15px rgba(88, 166, 255, 0.1);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .message {
+            margin: 0.5rem 0;
+            line-height: 1.5;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeInUp 0.4s ease forwards;
+        }
+
+        .user {
+            color: #58a6ff;
+            text-align: right;
+        }
+
+        .bot {
+            color: #d2a8ff;
+            text-align: left;
+        }
+
+        input, button {
+            background-color: #21262d;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input {
+            width: 70%;
+        }
+
+        button {
+            cursor: pointer;
+            margin-left: 0.5rem;
+        }
+
+        button:hover {
+            background-color: #30363d;
+            transform: scale(1.05);
+        }
+
+        .clickable-word {
+            cursor: pointer;
+            color: #79c0ff;
+            text-decoration: underline;
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        .clickable-word:hover {
+            color: #1f6feb;
+            text-shadow: 0 0 8px #58a6ff;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+<h2>Hypertext Chat</h2>
+<div id="chat-box"></div>
+<div>
+    <input type="text" id="user-input" placeholder="Введите сообщение..." />
+    <button onclick="sendMessage()">Отправить</button>
+</div>
+
+<script>
+    const chatBox = document.getElementById('chat-box');
+    const input = document.getElementById('user-input');
+
+    async function sendMessage() {
+        const text = input.value.trim();
+        if (!text) return;
+        addMessage('user', text);
+        input.value = '';
+
+        const res = await fetch('/api/ask', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({prompt: text})
+        });
+        const data = await res.text();
+        addMessage('bot', linkify(data));
+    }
+
+    function addMessage(sender, text) {
+        const msg = document.createElement('div');
+        msg.classList.add('message', sender);
+        msg.innerHTML = text;
+        chatBox.appendChild(msg);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // функция оборачивает каждое слово в span
+    function linkify(text) {
+        return text.replace(/\b(\w+)\b/g, word =>
+            `<span class="clickable-word" onclick="askAboutWord('${word}')">${word}</span>`
+        );
+    }
+
+    async function askAboutWord(word) {
+        addMessage('user', `<i>Уточнение про слово: ${word}</i>`);
+        const res = await fetch(`/api/ask`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({prompt: 'Объясни слово ' + word})
+        });
+        const reply = await res.text();
+        addMessage('bot', linkify(reply));
+    }
+
+    input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') sendMessage();
+    });
+</script>
+</body>
+</html>

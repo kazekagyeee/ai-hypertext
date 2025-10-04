@@ -1,0 +1,27 @@
+server:
+  port: 8080
+  http2:
+    enabled: true
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: ai-hypertext
+  main:
+    web-application-type: reactive
+  webflux:
+    base-path: /
+  servlet:
+    multipart:
+      max-file-size: ${MAX_FILE_SIZE:-1}
+      max-request-size: ${MAX_REQUEST_SIZE:-1}
+      enabled: true
+  codec:
+    max-in-memory-size: 64MB
+  jackson:
+    default-property-inclusion: non_null
+
+app:
+  ollama:
+    model: "qwen3:8b"
