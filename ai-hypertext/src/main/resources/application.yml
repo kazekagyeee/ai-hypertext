@@ -21,6 +21,11 @@ spring:
     codecs:
       max-in-memory-size: 64MB
 
+logging:
+  level:
+    org.springframework.web.reactive.function.client: DEBUG
+    reactor.netty.http.client: DEBUG
+
 app:
   ollama:
     model: "qwen3:8b"

@@ -11,13 +11,13 @@ class AskService(
 ) {
     private var lastAnswer = AtomicReference("")
 
-    fun askAboutWord(word: String): Mono<String?> {
+    fun askAboutWord(word: String): Mono<String> {
         val last = lastAnswer.get()
         val prompt = "Расскажи подробнее про это слово ${word}, не отходя от текущей темы: $last"
         return answer(prompt)
     }
 
-    fun answer(prompt: String): Mono<String?> {
+    fun answer(prompt: String): Mono<String> {
         return ollamaService.ask(prompt)
             .doOnNext { response -> lastAnswer.set(response) }
     }

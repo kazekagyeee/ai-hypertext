@@ -11,13 +11,13 @@ class AskController(
 ) {
 
     @PostMapping
-    fun ask(@RequestBody body: Map<String, String>): Mono<String?> {
+    fun ask(@RequestBody body: Map<String, String>): Mono<String> {
         val prompt = body["prompt"] ?: ""
         return askService.answer(prompt)
     }
 
     @GetMapping("/{word}")
-    fun askAboutWord(@PathVariable word: String): Mono<String?> {
+    fun askAboutWord(@PathVariable word: String): Mono<String> {
         return askService.askAboutWord(word)
     }
 }

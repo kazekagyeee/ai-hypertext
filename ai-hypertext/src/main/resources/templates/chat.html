@@ -131,6 +131,7 @@
             body: JSON.stringify({prompt: text})
         });
         const data = await res.text();
+        console.log('Ответ от бота:', data);
         addMessage('bot', linkify(data));
     }
 
@@ -144,7 +145,7 @@
 
     // функция оборачивает каждое слово в span
     function linkify(text) {
-        return text.replace(/\b(\w+)\b/g, word =>
+        return text.replace(/\p{L}+/gu, word =>
             `<span class="clickable-word" onclick="askAboutWord('${word}')">${word}</span>`
         );
     }
