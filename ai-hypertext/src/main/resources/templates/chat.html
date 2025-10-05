@@ -152,10 +152,8 @@
 
     async function askAboutWord(word) {
         addMessage('user', `<i>Уточнение про слово: ${word}</i>`);
-        const res = await fetch(`/api/ask`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({prompt: 'Объясни слово ' + word})
+        const res = await fetch(`/api/ask/${word}`, {
+            method: 'GET'
         });
         const reply = await res.text();
         addMessage('bot', linkify(reply));

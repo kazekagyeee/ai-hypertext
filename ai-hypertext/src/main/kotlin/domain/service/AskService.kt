@@ -13,7 +13,7 @@ class AskService(
 
     fun askAboutWord(word: String): Mono<String> {
         val last = lastAnswer.get()
-        val prompt = "Расскажи подробнее про это: ${word}, не отходя от текущей темы: $last"
+        val prompt = "Твой прошлый ответ: $last, не отходя от текущей темы расскажи про: ${word}"
         return answer(prompt)
     }
 
