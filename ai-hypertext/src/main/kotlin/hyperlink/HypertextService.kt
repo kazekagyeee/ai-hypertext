@@ -1,31 +1,25 @@
 package kazekagyee.hyperlink
 
 import org.springframework.stereotype.Service
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
+import reactor.core.publisher.Mono
 
 @Service
-class HypertextService {
+class HypertextService(
+    private val keywordExtractor: KeywordExtractorService
+) {
 
     /**
-     * Превращает каждое слово в тексте в гиперссылку.
+     * Превращает ключевые слова в тексте в гиперссылки.
      *
      * @param text исходный текст
      * @return HTML-строка с гиперссылками
      */
-    fun wrapText(text: String): String {
-        if (text.isBlank()) return ""
+    fun processText(text: String): Mono<String> {
+        if (text.isBlank()) return Mono.just("")
 
-        val regex = Regex("(\\w+|[^\\w]+)")
-        val parts = regex.findAll(text).map { it.value }.toList()
-
-        return parts.joinToString("") { part ->
-            if (part.matches(Regex("\\w+"))) {
-                val escaped = URLEncoder.encode(part, StandardCharsets.UTF_8)
-                """<span class="clickable-word" onclick="askAboutWord('$escaped')">$part</span>"""
-            } else {
-                part
-            }
+        return Mono.fromCallable {
+            val keywords = keywordExtractor.extractKeywords(text)
+            keywordExtractor.highlightKeywords(text, keywords)
         }
     }
 }

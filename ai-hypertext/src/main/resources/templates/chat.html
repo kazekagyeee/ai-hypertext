@@ -77,6 +77,26 @@
             text-align: left;
         }
 
+        .message {
+            margin: 0.5rem 0;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeInUp 0.5s ease forwards;
+            transition: background-color 0.3s ease;
+            font-size: 1rem;
+            word-wrap: break-word;
+        }
+
+        .user {
+            color: #58a6ff;
+            text-align: right;
+        }
+
+        .bot {
+            color: #d2a8ff;
+            text-align: left;
+        }
+
         input {
             background-color: #0d1117;
             color: #c9d1d9;
@@ -120,17 +140,17 @@
             box-shadow: none;
         }
 
-        /* Фиолетовые гиперссылки */
-        .clickable-word {
+        /* гиперссылки */
+        .keyword {
             cursor: pointer;
-            color: #c297ff;
+            color: #58a6ff;
             text-decoration: underline;
             transition: color 0.3s ease, text-shadow 0.3s ease;
         }
 
-        .clickable-word:hover {
-            color: #b06cff;
-            text-shadow: 0 0 8px rgba(208, 128, 255, 0.6);
+        .keyword:hover {
+            color: #58a6ff;
+            text-shadow: 0 0 8px rgba(108, 128, 255, 0.6);
         }
 
         @keyframes fadeInUp {
@@ -176,6 +196,35 @@
     const chatBox = document.getElementById('chat-box');
     const input = document.getElementById('user-input');
 
+    document.addEventListener("mouseover", async (e) => {
+        if (e.target.classList.contains("keyword")) {
+            const word = e.target.dataset.word;
+            const context = e.target.closest(".message")?.innerText || "";
+
+            let tooltip = document.getElementById("tooltip");
+            if (!tooltip) {
+                tooltip = document.createElement("div");
+                tooltip.id = "tooltip";
+                tooltip.classList.add("tooltip");
+                document.body.appendChild(tooltip);
+            }
+
+            const res = await fetch(`/api/ask/explain?word=${word}&context=${encodeURIComponent(context)}`);
+            const text = await res.text();
+            tooltip.innerText = text;
+            tooltip.style.left = e.pageX + "px";
+            tooltip.style.top = e.pageY + "px";
+            tooltip.classList.add("visible");
+        }
+    });
+
+    document.addEventListener("mouseout", (e) => {
+        if (e.target.classList.contains("keyword")) {
+            const tooltip = document.getElementById("tooltip");
+            if (tooltip) tooltip.classList.remove("visible");
+        }
+    });
+
     function addMessage(sender, text) {
         const msg = document.createElement('div');
         msg.classList.add('message', sender);
@@ -201,29 +250,9 @@
             });
             const data = await res.text();
             loadingMsg.remove();
-            addMessage('bot', linkify(data));
+            addMessage('bot', data);
         } catch (e) {
             loadingMsg.innerHTML = '<i style="color: #ff7b72;">Ошибка при получении ответа.</i>';
-        }
-    }
-
-    function linkify(text) {
-        return text.replace(/\p{L}+/gu, word =>
-            `<span class="clickable-word" onclick="askAboutWord('${word}')">${word}</span>`
-        );
-    }
-
-    async function askAboutWord(word) {
-        addMessage('user', `<i>Уточнение про слово: ${word}</i>`);
-        const loadingMsg = addMessage('bot', '<i class="loading">В раздумьях...</i>');
-
-        try {
-            const res = await fetch(`/api/ask/${word}`, { method: 'GET' });
-            const reply = await res.text();
-            loadingMsg.remove();
-            addMessage('bot', linkify(reply));
-        } catch {
-            loadingMsg.innerHTML = '<i style="color: #ff7b72;">Ошибка при получении уточнения.</i>';
         }
     }
 

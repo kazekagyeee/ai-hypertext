@@ -16,8 +16,11 @@ class AskController(
         return askService.answer(prompt)
     }
 
-    @GetMapping("/{word}")
-    fun askAboutWord(@PathVariable word: String): Mono<String> {
-        return askService.askAboutWord(word)
+    @GetMapping("/explain")
+    fun askAboutWord(
+        @RequestParam word: String,
+        @RequestParam context: String
+    ): Mono<String> {
+        return askService.askAboutWord(word, context)
     }
 }
