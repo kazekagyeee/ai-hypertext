@@ -25,7 +25,9 @@ class AskService(
             .flatMap { cached -> if (cached != null) Mono.just(cached) else Mono.empty() }
             .switchIfEmpty(
                 Mono.defer {
-                    val prompt = """Твой прошлый ответ: $context, не отходя от текущей темы расскажи про: $word"""
+                    val prompt = """Используй в ответе не более 300 символов. 
+                        |Твой прошлый ответ: $context, 
+                        |не отходя от текущей темы расскажи про: $word""".trimMargin()
                     generateAnswer(prompt)
                         .flatMap { generated ->
                             redis.opsForValue().set(key, generated).thenReturn(generated)

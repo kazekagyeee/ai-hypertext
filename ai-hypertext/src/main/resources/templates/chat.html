@@ -155,21 +155,22 @@
 
         .tooltip {
             position: absolute;
-            background: #161b22;
-            color: #c9d1d9;
-            border: 1px solid #30363d;
-            border-radius: 8px;
-            padding: 8px 10px;
-            max-width: 300px;
-            font-size: 0.9rem;
+            background: #222;
+            color: #eee;
+            padding: 8px 12px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+            font-size: 14px;
             line-height: 1.4;
+            max-width: 400px;
+            max-height: 250px; /* 👈 ограничиваем высоту */
+            overflow-y: auto;  /* 👈 добавляем прокрутку */
+            scrollbar-width: thin;
+            scrollbar-color: #555 #222;
             z-index: 9999;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
-            display: none;
-            pointer-events: none;
-            transform: translate(-50%, -100%);
-            white-space: normal;
-            animation: fadeInTooltip 0.15s ease-out;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: auto;
         }
 
         .tooltip::after {
@@ -185,6 +186,7 @@
 
         .tooltip.visible {
             display: block;
+            opacity: 1;
         }
 
         @keyframes fadeInTooltip {

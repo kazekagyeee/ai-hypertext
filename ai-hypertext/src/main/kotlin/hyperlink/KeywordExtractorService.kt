@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service
 @Service
 class KeywordExtractorService {
 
-    private val amountOfKeywords = 5
+    private val amountOfKeywords = 10
     private val stopWords = setOf(
         // Местоимения
         "я", "ты", "он", "она", "оно", "мы", "вы", "они",
@@ -23,7 +23,7 @@ class KeywordExtractorService {
         "у", "о", "об", "обо", "за", "над", "под", "перед", "при",
         "про", "через", "сквозь", "между", "среди", "вокруг",
         "возле", "около", "близ", "вдоль", "поперёк", "против",
-        "ради", "благодаря", "вопреки", "вследствие",
+        "ради", "благодаря", "вопреки", "вследствие", "для",
 
         // Союзы
         "и", "а", "но", "или", "либо", "ни", "да", "что", "чтобы",
@@ -96,11 +96,13 @@ class KeywordExtractorService {
 
     fun extractKeywords(text: String): List<String> {
         val words = text.split(Regex("[^А-Яа-яЁёA-Za-z]+"))
+            .asSequence()
             .filter { it.length >= 3 && it.isNotBlank() }
             .map { it.lowercase() }
             .filterNot { stopWords.contains(it) }
             .distinct()
             .take(amountOfKeywords)
+            .toList()
 
         println("Found words: $words")
         return words
@@ -109,10 +111,11 @@ class KeywordExtractorService {
     fun highlightKeywords(text: String, keywords: List<String>): String {
         var result = text
         for (word in keywords) {
-            val regex = Regex("\\b$word\\b", RegexOption.IGNORE_CASE)
+            val regex = Regex("(?<!\\S)$word(?!\\S)", RegexOption.IGNORE_CASE)
             result = regex.replace(result) {
                 """<span class="keyword" data-word="${it.value}">${it.value}</span>"""
             }
+            //result.replace(word, """<span class="keyword" data-word="$word">${word}</span>""")
         }
         return result
     }
