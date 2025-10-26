@@ -15,7 +15,9 @@ class AskService(
 ) {
     private var lastAnswer = AtomicReference("")
 
-    //TODO тултип не выводится, нужно отредактировать html
+    /**
+     * Сгенерировать ответ для окна пояснения
+     */
     fun askAboutWord(word: String, context: String): Mono<String> {
         val key = "explain:$word:${context.hashCode()}"
 
@@ -24,7 +26,7 @@ class AskService(
             .switchIfEmpty(
                 Mono.defer {
                     val prompt = """Твой прошлый ответ: $context, не отходя от текущей темы расскажи про: $word"""
-                    answer(prompt)
+                    generateAnswer(prompt)
                         .flatMap { generated ->
                             redis.opsForValue().set(key, generated).thenReturn(generated)
                         }
@@ -32,10 +34,19 @@ class AskService(
             )
     }
 
-    //TODO сделать отдельный метод для тултипа, чтобы в нём не было гиперссылок
+    /**
+     * Ответ для чата
+     */
     fun answer(prompt: String): Mono<String> {
+        return generateAnswer(prompt)
+            .flatMap { response -> hypertextService.processText(response) }
+    }
+
+    /**
+     * Генерация ответа
+     */
+    fun generateAnswer(prompt: String): Mono<String> {
         return ollamaService.ask(prompt)
             .doOnNext { response -> lastAnswer.set(response) }
-            .flatMap { response -> hypertextService.processText(response) }
     }
 }

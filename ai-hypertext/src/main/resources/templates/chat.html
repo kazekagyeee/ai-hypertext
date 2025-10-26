@@ -153,6 +153,45 @@
             text-shadow: 0 0 8px rgba(108, 128, 255, 0.6);
         }
 
+        .tooltip {
+            position: absolute;
+            background: #161b22;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 8px 10px;
+            max-width: 300px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            z-index: 9999;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+            display: none;
+            pointer-events: none;
+            transform: translate(-50%, -100%);
+            white-space: normal;
+            animation: fadeInTooltip 0.15s ease-out;
+        }
+
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 6px;
+            border-style: solid;
+            border-color: #161b22 transparent transparent transparent;
+        }
+
+        .tooltip.visible {
+            display: block;
+        }
+
+        @keyframes fadeInTooltip {
+            from { opacity: 0; transform: translate(-50%, -80%); }
+            to { opacity: 1; transform: translate(-50%, -100%); }
+        }
+
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -209,12 +248,27 @@
                 document.body.appendChild(tooltip);
             }
 
-            const res = await fetch(`/api/ask/explain?word=${word}&context=${encodeURIComponent(context)}`);
-            const text = await res.text();
-            tooltip.innerText = text;
-            tooltip.style.left = e.pageX + "px";
-            tooltip.style.top = e.pageY + "px";
+            tooltip.innerText = "Загрузка...";
             tooltip.classList.add("visible");
+
+            // Позиционируем над словом
+            const rect = e.target.getBoundingClientRect();
+            tooltip.style.left = (rect.left + rect.width / 2) + "px";
+            tooltip.style.top = (window.scrollY + rect.top - 8) + "px";
+
+            try {
+                const res = await fetch(`/api/ask/explain?word=${word}&context=${encodeURIComponent(context)}`);
+                const text = await res.text();
+                tooltip.innerText = text;
+
+                // Обновляем позицию на случай, если высота изменилась
+                const newRect = e.target.getBoundingClientRect();
+                tooltip.style.left = (newRect.left + newRect.width / 2) + "px";
+                tooltip.style.top = (window.scrollY + newRect.top - 8) + "px";
+
+            } catch (err) {
+                tooltip.innerText = "Ошибка загрузки описания.";
+            }
         }
     });
 
